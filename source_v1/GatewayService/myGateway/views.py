@@ -214,7 +214,7 @@ def gateway_get_all_tickets_and_buy(request):
                         return JsonResponse(payment_with_bonus.json(), status=payment_with_bonus.status_code, safe=False)
 
                 except requests.exceptions.ConnectionError:
-                    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                    return JsonResponse({'message': 'Bonus Service unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
                 bonus = payment_with_bonus.json()
 
@@ -287,7 +287,7 @@ def gateway_get_all_tickets_and_buy(request):
 
             except requests.exceptions.ConnectionError:
 
-                return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return JsonResponse({'message': 'Bonus Service unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     else:
         return JsonResponse({'message': 'user with this name doesnt exist'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
@@ -430,7 +430,7 @@ def gateway_get_privilege_info(request):
             privilege_of_user = requests.get("http://bonus:8050/api/v1/privilege_history", headers={"X-User-Name": user})
             return JsonResponse(privilege_of_user.json(), status=privilege_of_user.status_code, safe=False)
         except requests.exceptions.ConnectionError:
-            return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return JsonResponse({'message': 'Bonus Service unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
         return JsonResponse({'message': 'user with this name doesnt exist'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
 
