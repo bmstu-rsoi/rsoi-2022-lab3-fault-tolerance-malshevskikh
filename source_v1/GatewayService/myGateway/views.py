@@ -85,7 +85,14 @@ def gateway_get_user_info(request):
 
                 except requests.exceptions.ConnectionError:
 
-                    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                    me_dto = {
+                        "tickets": list_of_tickets,
+                        "privilege": {
+                        }
+                    }
+                    
+                    return JsonResponse(me_dto, status=status.HTTP_200_OK, safe=False)
+                    #return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         except requests.exceptions.ConnectionError:
 
