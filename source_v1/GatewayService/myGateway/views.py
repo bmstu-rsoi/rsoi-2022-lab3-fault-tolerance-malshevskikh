@@ -382,10 +382,12 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
 
             #try:
 
-            return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
-            if return_money.status_code != 200:
-                return JsonResponse({'message': 'Билет отмненен, но не смогли забрать/вренуть бонусы, возможно у вас нет бонусного счета'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
-            return JsonResponse({'message': 'Возврат билета успешно выполнен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
+            else:
+                return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
+                if return_money.status_code != 200:
+                    return JsonResponse({'message': 'Билет отмненен, но не смогли забрать/вренуть бонусы, возможно у вас нет бонусного счета'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
+                else:
+                    return JsonResponse({'message': 'Возврат билета успешно выполнен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
 
             #except requests.exceptions.ConnectionError:
             #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
