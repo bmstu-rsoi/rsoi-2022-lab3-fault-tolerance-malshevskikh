@@ -32,7 +32,9 @@ jobs:
           WAIT_PORTS: 8080,8070,8060,8050
 
       # TODO setup variant, service and port
-
+      - name: Let's wait
+        run: sleep 30
+        
       - name: Run API Tests
         timeout-minutes: 5
         run: ./scripts/test-script.sh
