@@ -370,27 +370,29 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
 
             #try:
 
-            change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(ticketUid), headers={"X-User-Name": user})
-            if change_ticket.status_code != 204:
-                return JsonResponse({'message': 'Билет либо не найден, либо уже отменен'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
+            valid_ticket = requests.get("http://ticket:8070/api/v1/tickets/{}".format(ticketUid), headers={"X-User-Name": user})
+            if valid_ticket.status_code == 200:
+                change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(ticketUid), headers={"X-User-Name": user})
+                if change_ticket.status_code != 204:
+                    return JsonResponse({'message': 'Билет либо не найден, либо уже отменен'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
 
-            #except requests.exceptions.ConnectionError:
+                #except requests.exceptions.ConnectionError:
 
-            #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-            #return_money = requests.patch("http://127.0.0.1:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
+                #return_money = requests.patch("http://127.0.0.1:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
 
-            #try:
+                #try:
 
-            else:
-                return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
-                if return_money.status_code != 200:
-                    return JsonResponse({'message': 'Билет отмненен, но не смогли забрать/вренуть бонусы, возможно у вас нет бонусного счета'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
                 else:
-                    return JsonResponse({'message': 'Возврат билета успешно выполнен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
+                    return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(ticketUid), headers={"X-User-Name": user})
+                    if return_money.status_code != 200:
+                        return JsonResponse({'message': 'Билет отмненен, но не смогли забрать/вренуть бонусы, возможно у вас нет бонусного счета'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
+                    else:
+                        return JsonResponse({'message': 'Возврат билета успешно выполнен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
 
-            #except requests.exceptions.ConnectionError:
-            #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                #except requests.exceptions.ConnectionError:
+                #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     else:
         return JsonResponse({'message': 'user with this name doesnt exist'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
