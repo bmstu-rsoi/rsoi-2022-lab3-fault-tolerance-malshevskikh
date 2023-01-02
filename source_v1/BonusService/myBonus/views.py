@@ -215,4 +215,5 @@ def return_privilege_count(request, ticket_id):
 @circuit(failure_threshold = 5, recovery_timeout = 10)
 @api_view(['GET'])
 def check_connection_bonus(request):
+    print("ДАК Я ЖИВ ИЛИ НЕТ")
     return JsonResponse({'message': 'connection is ok'}, status=status.HTTP_200_OK, safe=False)

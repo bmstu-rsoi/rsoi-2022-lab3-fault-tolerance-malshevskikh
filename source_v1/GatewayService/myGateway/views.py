@@ -18,10 +18,14 @@ TICKET_ID_FOR_DEL = ""
 
 def run_request():
     check = requests.get("http://bonus:8050/api/v1/manage/health")
+    print("НЕУЖЕЛИ!!!!")
     if check.status_code == 200:
         COUNT_OF_TRY = 0
+        print("AAA:LLLLLLL")
         change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+
         return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+
         schedule.cancel_job(j)
 
 j = schedule.every(3).seconds.do(run_request)
@@ -391,8 +395,11 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
 
             #try:
 
-            valid_ticket = requests.get("http://ticket:8070/api/v1/tickets/{}".format(ticketUid), headers={"X-User-Name": user})
-            if valid_ticket.status_code == 200:
+            print('!!!!!!!!!BLIN!!!!!!!!', COUNT_OF_TRY)
+            check_bonus = requests.get("http://bonus:8050/api/v1/manage/health")
+            print("СТАТУС сервиса", check_bonus.status_code)
+            #valid_ticket = requests.get("http://ticket:8070/api/v1/tickets/{}".format(ticketUid), headers={"X-User-Name": user})
+            if check_bonus.status_code == 200:
                 change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(ticketUid), headers={"X-User-Name": user})
                 if change_ticket.status_code != 204:
                     return JsonResponse({'message': 'Билет либо не найден, либо уже отменен'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
@@ -416,11 +423,12 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
                 #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
             elif (COUNT_OF_TRY < n):
-
+                print("Я тут УРААААА!!!", COUNT_OF_TRY)
                 COUNT_OF_TRY = COUNT_OF_TRY + 1
                 return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
             else:
+                print("А теперь тут МММММММММ!!", COUNT_OF_TRY)
                 noth = {
                     "work": 'no',
                 }
@@ -428,6 +436,8 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
                 USER_NAME_FOR_DEL = user
                 TICKET_ID_FOR_DEL = ticketUid
 
+                print(USER_NAME_FOR_DEL)
+                print(TICKET_ID_FOR_DEL)
                 schedule.run_pending()
 
                 return JsonResponse({'message': 'Билет успешно возвращен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
