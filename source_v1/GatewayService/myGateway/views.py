@@ -380,14 +380,14 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
                             return JsonResponse({'message': 'no flights for this number'}, status=valid_flights.status_code, safe=False)
 
                     except requests.exceptions.ConnectionError:
-
+                        COUNT_OF_TRY = COUNT_OF_TRY + 1
                         return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
                 else:
                     return JsonResponse({'message': 'no tickets for this user'}, status=valid_ticket.status_code, safe=False)
 
             except requests.exceptions.ConnectionError:
-
+                COUNT_OF_TRY = COUNT_OF_TRY + 1
                 return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         elif request.method == 'DELETE':
