@@ -322,7 +322,7 @@ def gateway_get_all_tickets_and_buy(request):
 #Информация по конкретному билету и возврат билета
 @circuit(failure_threshold = 3, recovery_timeout = 5)
 @api_view(['GET', 'DELETE'])
-def gateway_get_ticket_info_and_cancel(request, ticketUid, COUNT_OF_TRY):
+def gateway_get_ticket_info_and_cancel(request, ticketUid):
     print('ok')
     user = request.headers.get('X-User-Name')
     if user is not None:
