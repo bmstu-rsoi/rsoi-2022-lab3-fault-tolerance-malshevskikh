@@ -9,26 +9,32 @@ from circuitbreaker import circuit
 import schedule
 
 # Create your views here.
-global COUNT_OF_TRY
+#global COUNT_OF_TRY
 n = 1
-
+COUNT_OF_TRY = 0
 
 USER_NAME_FOR_DEL = ""
 TICKET_ID_FOR_DEL = ""
 
 def run_request():
-    check = requests.get("http://bonus:8050/api/v1/manage/health")
-    print("НЕУЖЕЛИ!!!!")
-    if check.status_code == 200:
-        COUNT_OF_TRY = 0
-        print("AAA:LLLLLLL")
-        change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
-
-        return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
-
-        schedule.cancel_job(j)
+    try:
+        check = requests.get("http://bonus:8050/manage/health")
+        print("НЕУЖЕЛИ!!!!")
+        if check.status_code == 200:
+            COUNT_OF_TRY = 0
+            print("AAA:LLLLLLL")
+            change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+            return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+            schedule.cancel_job(j)
+    except requests.exceptions.ConnectionError:
+        print("мы будем ждать!!!!")
+    print(j)
 
 j = schedule.every(3).seconds.do(run_request)
+
+#def run_task():
+#    while True:
+#        schedule.run_pending()
 
 
 #Запросы по пользваотелю
@@ -328,8 +334,8 @@ def gateway_get_all_tickets_and_buy(request):
 @api_view(['GET', 'DELETE'])
 def gateway_get_ticket_info_and_cancel(request, ticketUid):
     print('ok')
-    COUNT_OF_TRY = 0
-    print('COUNT_OF_TRY', COUNT_OF_TRY)
+    #print('COUNT_OF_TRY', COUNT_OF_TRY)
+    global COUNT_OF_TRY
     user = request.headers.get('X-User-Name')
     if user is not None:
         if request.method == 'GET':
@@ -380,14 +386,18 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
                             return JsonResponse({'message': 'no flights for this number'}, status=valid_flights.status_code, safe=False)
 
                     except requests.exceptions.ConnectionError:
-                        COUNT_OF_TRY = COUNT_OF_TRY + 1
+                        #COUNT_OF_TRY = COUNT_OF_TRY + 1
+                        #l = COUNT_OF_TRY
+                        #print(COUNT_OF_TRY)
                         return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
                 else:
                     return JsonResponse({'message': 'no tickets for this user'}, status=valid_ticket.status_code, safe=False)
 
             except requests.exceptions.ConnectionError:
-                COUNT_OF_TRY = COUNT_OF_TRY + 1
+                #COUNT_OF_TRY = COUNT_OF_TRY + 1
+                #l = COUNT_OF_TRY
+                #print(COUNT_OF_TRY)
                 return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         elif request.method == 'DELETE':
@@ -443,7 +453,13 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
 
                     print(USER_NAME_FOR_DEL)
                     print(TICKET_ID_FOR_DEL)
+
+                    #while True:
                     schedule.run_pending()
+                    change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(TICKET_ID_FOR_DEL),
+                                                   headers={"X-User-Name": USER_NAME_FOR_DEL})
+                    #print(j)
+                    #run_task()
 
                     return JsonResponse({'message': 'Билет успешно возвращен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
 
@@ -487,6 +503,7 @@ def gateway_get_all_flights(request):
 @circuit(failure_threshold = 3, recovery_timeout = 5)
 @api_view(['GET'])
 def gateway_get_privilege_info(request):
+    global COUNT_OF_TRY
     user = request.headers.get('X-User-Name')
     if user is not None:
         try:
@@ -494,6 +511,7 @@ def gateway_get_privilege_info(request):
             privilege_of_user = requests.get("http://bonus:8050/api/v1/privilege_history", headers={"X-User-Name": user})
             return JsonResponse(privilege_of_user.json(), status=privilege_of_user.status_code, safe=False)
         except requests.exceptions.ConnectionError:
+            COUNT_OF_TRY = COUNT_OF_TRY + 1
             return JsonResponse({'message': 'Bonus Service unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
         return JsonResponse({'message': 'user with this name doesnt exist'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
