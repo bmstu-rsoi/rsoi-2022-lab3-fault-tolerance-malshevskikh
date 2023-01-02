@@ -6,7 +6,26 @@ from django.http import JsonResponse
 import os
 from circuitbreaker import circuit
 
+import schedule
+
 # Create your views here.
+COUNT_OF_TRY = 0
+n = 3
+
+
+USER_NAME_FOR_DEL = ""
+TICKET_ID_FOR_DEL = ""
+
+def run_request():
+    check = requests.get("http://bonus:8050/api/v1/manage/health")
+    if check.status_code == 200:
+        COUNT_OF_TRY = 0
+        change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+        return_money = requests.patch("http://bonus:8050/api/v1/return_money/{}".format(TICKET_ID_FOR_DEL), headers={"X-User-Name": USER_NAME_FOR_DEL})
+        schedule.cancel_job(j)
+
+j = schedule.every(3).seconds.do(run_request)
+
 
 #Запросы по пользваотелю
 #Информация о пользователе
@@ -303,7 +322,7 @@ def gateway_get_all_tickets_and_buy(request):
 #Информация по конкретному билету и возврат билета
 @circuit(failure_threshold = 3, recovery_timeout = 5)
 @api_view(['GET', 'DELETE'])
-def gateway_get_ticket_info_and_cancel(request, ticketUid):
+def gateway_get_ticket_info_and_cancel(request, ticketUid, COUNT_OF_TRY):
     print('ok')
     user = request.headers.get('X-User-Name')
     if user is not None:
@@ -394,6 +413,23 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
                 #except requests.exceptions.ConnectionError:
                 #    return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
+            elif (COUNT_OF_TRY < n):
+
+                COUNT_OF_TRY = COUNT_OF_TRY + 1
+                return JsonResponse({'message': 'Service is unavailable'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+            else:
+                noth = {
+                    "work": 'no',
+                }
+
+                USER_NAME_FOR_DEL = user
+                TICKET_ID_FOR_DEL = ticketUid
+
+                schedule.run_pending()
+
+                return JsonResponse({'message': 'Билет успешно возвращен'}, status=status.HTTP_204_NO_CONTENT, safe=False)
+
     else:
         return JsonResponse({'message': 'user with this name doesnt exist'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
 
@@ -451,3 +487,4 @@ def gateway_get_privilege_info(request):
 @api_view(['GET'])
 def check_connection_gateway(request):
     return JsonResponse({'message': 'connection is ok'}, status=status.HTTP_200_OK, safe=False)
+
