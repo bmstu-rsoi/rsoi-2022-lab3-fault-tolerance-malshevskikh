@@ -9,8 +9,8 @@ from circuitbreaker import circuit
 import schedule
 
 # Create your views here.
-COUNT_OF_TRY = 0
-n = 3
+global COUNT_OF_TRY
+n = 1
 
 
 USER_NAME_FOR_DEL = ""
@@ -324,11 +324,13 @@ def gateway_get_all_tickets_and_buy(request):
 @api_view(['GET', 'DELETE'])
 def gateway_get_ticket_info_and_cancel(request, ticketUid):
     print('ok')
+    COUNT_OF_TRY = 0
+    print('COUNT_OF_TRY', COUNT_OF_TRY)
     user = request.headers.get('X-User-Name')
     if user is not None:
         if request.method == 'GET':
             print("hhhhh")
-
+            print('COUNT_OF_TRY  !!!!!!', COUNT_OF_TRY)
             try:
 
                 #valid_ticket = requests.get("http://127.0.0.1:8070/api/v1/tickets/{}".format(ticketUid), headers={"X-User-Name": user})
