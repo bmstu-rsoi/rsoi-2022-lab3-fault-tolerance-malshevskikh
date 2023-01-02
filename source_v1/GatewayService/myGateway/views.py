@@ -396,8 +396,9 @@ def gateway_get_ticket_info_and_cancel(request, ticketUid):
             #try:
 
             print('!!!!!!!!!BLIN!!!!!!!!', COUNT_OF_TRY)
-            check_bonus = requests.get("http://bonus:8050/api/v1/manage/health")
-            print("СТАТУС сервиса", check_bonus.status_code)
+            check_bonus = requests.get("http://bonus:8050/manage/health")
+            check_bonus_f = requests.get("http://bonus:8050/api/v1/manage/health")
+            print("СТАТУС сервиса", check_bonus.status_code, check_bonus_f)
             #valid_ticket = requests.get("http://ticket:8070/api/v1/tickets/{}".format(ticketUid), headers={"X-User-Name": user})
             if check_bonus.status_code == 200:
                 change_ticket = requests.patch("http://ticket:8070/api/v1/del_tick/{}".format(ticketUid), headers={"X-User-Name": user})
